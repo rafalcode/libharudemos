@@ -17,31 +17,16 @@
 #include <string.h>
 #include <setjmp.h>
 #include "hpdf.h"
-#include "grid_sheet.h"
 
-#ifdef STAND_ALONE
 jmp_buf env;
 
-#ifdef HPDF_DLL
-void __stdcall
-#else
-void
-#endif
-error_handler  (HPDF_STATUS   error_no,
-                HPDF_STATUS   detail_no,
-                void         *user_data)
+void error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no, void *user_data)
 {
-    printf ("ERROR: error_no=%04X, detail_no=%u\n", (HPDF_UINT)error_no,
-                (HPDF_UINT)detail_no);
+    printf ("ERROR: error_no=%04X, detail_no=%u\n", (HPDF_UINT)error_no, (HPDF_UINT)detail_no);
     longjmp(env, 1);
 }
 
-
-#endif /* STAND_ALONE */
-
-void
-print_grid  (HPDF_Doc     pdf,
-             HPDF_Page    page)
+void print_grid (HPDF_Doc pdf, HPDF_Page page)
 {
     HPDF_REAL height = HPDF_Page_GetHeight (page);
     HPDF_REAL width = HPDF_Page_GetWidth (page);
@@ -119,11 +104,7 @@ print_grid  (HPDF_Doc     pdf,
 
             HPDF_Page_BeginText (page);
             HPDF_Page_MoveTextPos (page, 5, y - 2);
-#ifdef __WIN32__
-            _snprintf (buf, 12, "%u", y);
-#else
             snprintf (buf, 12, "%u", y);
-#endif
             HPDF_Page_ShowText (page, buf);
             HPDF_Page_EndText (page);
         }
@@ -163,22 +144,19 @@ print_grid  (HPDF_Doc     pdf,
 
 #ifdef STAND_ALONE
 
-int
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-    HPDF_Doc  pdf;
     HPDF_Page page;
     char fname[256];
 
     strcpy (fname, argv[0]);
     strcat (fname, ".pdf");
 
-    pdf = HPDF_New (error_handler, NULL);
-    if (!pdf) {
+    HPDF_Doc pdf = HPDF_New (error_handler, NULL); // no, don't combine in if statement.
+    if( !(pdf) ) {
         printf ("error: cannot create PdfDoc object\n");
         return 1;
     }
-
     if (setjmp(env)) {
         HPDF_Free (pdf);
         return 1;
@@ -187,13 +165,11 @@ main (int argc, char **argv)
     /* add a new page object. */
     page = HPDF_AddPage (pdf);
 
-    HPDF_Page_SetHeight (page, 600);
-    HPDF_Page_SetWidth (page, 400);
+    HPDF_Page_SetWidth(page, 595.276);
+    HPDF_Page_SetHeight(page, 841.89);
 
     print_grid  (pdf, page);
 
-
-    /* save the document to a file */
     HPDF_SaveToFile (pdf, fname);
 
     /* clean up */

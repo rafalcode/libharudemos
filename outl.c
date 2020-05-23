@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 {
     HPDF_Doc  pdf;
     HPDF_Font font;
-    HPDF_Page page[3]; // hmmm ... I only get 3 pages.
+    HPDF_Page page[3]; // hmmm ... I only get 3 pages. So this directive is correct. The precompiled pdf may have had 4 though. An small oversight, that's all.
     HPDF_Outline root;
     HPDF_Outline outline[3];
     HPDF_Destination dst;
